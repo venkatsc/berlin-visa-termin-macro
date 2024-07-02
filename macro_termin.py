@@ -41,6 +41,7 @@ class WebDriver:
         logging.info("Open browser")
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--incognito")
         if self.mode == "local":
             self.driver = webdriver.Chrome(
                 service=Service(ChromeDriverManager().install()), options=options
@@ -206,16 +207,15 @@ class MacroTermin:
 
     def handle_success(self, driver):
         logging.info("!!!SUCCESS - do not close the window!!!!")
+        self._play_sound()
         while True:
             try:
-                self._send_slack_notification(driver)
-                self._play_sound()
                 time.sleep(
                     15
                 )  # This will wait for 15 seconds before continuing with the next iteration.
             except KeyboardInterrupt:  # Catching the interrupt signal
                 logging.info("Keyboard interrupt received, exiting...")
-                break  # Exiting the loop
+                raise  # Exiting the loop
             except (
                 Exception
             ) as e:  # This catches all other exceptions and keeps the loop running
@@ -223,38 +223,44 @@ class MacroTermin:
                     f"Error encountered: {e} - during SUCCESS to minimize the risk of closing the tab."
                 )
 
-    def run_once(self):
-        with WebDriver(self.mode) as driver:
-            self.enter_start_page(driver)
-            self.tick_off_agreement(driver)
-            self.execute_form_actions(driver)
-            time.sleep(self.wait_time)
+    def run_once(self, driver):
+        self.enter_start_page(driver)
+        self.tick_off_agreement(driver)
+        self.execute_form_actions(driver)
+        time.sleep(self.wait_time)
 
-            # retry submit
-            for _ in range(16):
+        # retry submit
+        for _ in range(16):
+            try:
                 if not self.error_message in driver.page_source:
                     self.handle_success(driver)
                     time.sleep(self.wait_time*1000)
                 logging.info("Retry submitting form")
-                try:
-                    driver.find_element(
-                        By.ID, "applicationForm:managedForm:proceed"
-                    ).click()
-                except:
-                    logging.info("Submission failure.")
-                    
-                    
-                time.sleep(self.wait_time)
+            except KeyboardInterrupt:
+                logging.info("Existed out of SUCCESS. Wil resubmit form. To exit press ctrl + c again")
+            try:
+                driver.find_element(
+                    By.ID, "applicationForm:managedForm:proceed"
+                ).click()
+            except:
+                logging.info("Submission failure.")
+                
+                
+            time.sleep(self.wait_time)
 
     def run_loop(self):
-        logging.info("Sound Test! You will hear the same sound when it succeeds!")
-        self._play_sound()
+        # logging.info("Sound Test! You will hear the same sound when it succeeds!")
+        # self._play_sound()
         idx = 0
-        while True:
-            logging.info(f"Iteration over {idx} times.")
-            self.run_once()
-            # Add any conditional checks or success handling here
-
+        with WebDriver(self.mode) as driver:
+            try:
+                while True:
+                    logging.info(f"Iteration over {idx} times.")
+                    self.run_once(driver)
+                    # Add any conditional checks or success handling here
+            except:
+                logging.info("Encountered exception. Keeping windown for 20mins")
+                time.sleep(20 * 60)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

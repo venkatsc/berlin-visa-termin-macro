@@ -4,14 +4,14 @@ termin_bot:
   error_message: "Für die gewählte Dienstleistung sind aktuell keine Termine frei! Bitte"
 
 form_selections:
-  nationality: "Korea, Republik"
+  nationality: "Indien"
   num_applicants: "eine Person"
   living_with_family: "ja" # "nein" for single
-  family_nationality: "Korea, Republik"
+  family_nationality: "Indien"
 
 click_labels:
-  visa_case: "Aufenthaltstitel - beantragen" # "Aufenthaltstitel - verlängern"
+  visa_case: "Aufenthaltstitel - verlängern" # "Aufenthaltstitel - verlängern"
   application_reason: "Familiäre Gründe" # "Erwerbstätigkeit" "Studium und Ausbildung"
-  detail_reason: "Aufenthaltserlaubnis für Ehepartner und Kinder von Inhabern einer Blauen Karte EU (§§ 29-32)" # "Aufenthaltserlaubnis zum Studium (§ 16b)"
+  detail_reason: "Aufenthaltserlaubnis für Ehepartner, Eltern und Kinder von ausländischen Familienangehörigen (§§ 29-34)" # "Aufenthaltserlaubnis zum Studium (§ 16b)"
 
-slack_webhook_url: "https://hooks.slack.com/services/YOUR_CREDENTIAL"
+slack_webhook_url: "https://hooks.slack.com/services/dfbffd8c9c68026f8ed1d42cb40c7958"
